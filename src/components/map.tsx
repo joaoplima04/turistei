@@ -83,3 +83,4 @@ export function MapComponent({ spots, center, zoom }: MapComponentProps) {
         </MapContainer>
     );
 }
+export default MapComponent;

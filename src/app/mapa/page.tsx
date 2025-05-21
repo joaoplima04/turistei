@@ -1,18 +1,21 @@
-import { MapComponent } from '@/components/map';
+import dynamic from 'next/dynamic';
 import { touristSpots } from '@/lib/mock-data';
 import { Header } from '@/components/hearder';
 
-export default function MapPage() {
-    // Centro do Rio de Janeiro
-    const center: [number, number] = [-22.9068, -43.1729];
-    const zoom = 12;
+const MapComponent = dynamic(() => import('@/components/map'), {
+  ssr: false, // ← 🔥 impede o Next.js de renderizar no servidor
+});
 
-    return (
-        <div className="flex flex-col min-h-screen">
-            <Header />
-            <main className="flex-1 pt-16">
-                <MapComponent spots={touristSpots} center={center} zoom={zoom} />
-            </main>
-        </div>
-    );
+export default function MapPage() {
+  const center: [number, number] = [-22.9068, -43.1729];
+  const zoom = 12;
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <main className="flex-1 pt-16">
+        <MapComponent spots={touristSpots} center={center} zoom={zoom} />
+      </main>
+    </div>
+  );
 }

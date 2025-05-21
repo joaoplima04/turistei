@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Header } from '@/components/hearder';
 import { Button } from '@/components/ui/button';
-import { MapIcon, Navigation, Camera, Compass } from 'lucide-react';
+import { MapIcon, Navigation, Camera, Compass, LogIn, UserPlus } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -17,12 +17,29 @@ export default function Home() {
               Explore os pontos turísticos mais incríveis das Cidades Maravilhosas com o Turistei,
               seu guia interativo para uma experiência inesquecível.
             </p>
-            <Link href="/mapa">
-              <Button size="lg" className="gap-2">
-                <MapIcon className="w-5 h-5" />
-                Explorar o Mapa
-              </Button>
-            </Link>
+
+            <div className="flex flex-col md:flex-row gap-4 justify-center">
+              <Link href="/mapa">
+                <Button size="lg" className="gap-2">
+                  <MapIcon className="w-5 h-5" />
+                  Explorar o Mapa
+                </Button>
+              </Link>
+
+              <Link href="/login">
+                <Button variant="outline" size="lg" className="gap-2">
+                  <LogIn className="w-5 h-5" />
+                  Entrar
+                </Button>
+              </Link>
+
+              <Link href="/cadastro">
+                <Button variant="ghost" size="lg" className="gap-2">
+                  <UserPlus className="w-5 h-5" />
+                  Criar Conta
+                </Button>
+              </Link>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 mt-16">
@@ -46,7 +63,7 @@ export default function Home() {
               <Compass className="w-12 h-12 text-primary mb-4" />
               <h3 className="text-xl font-semibold mb-2">Pontos Destacados</h3>
               <p className="text-muted-foreground">
-                Descubra os lugares mais populares e imperdíveis Brasil.
+                Descubra os lugares mais populares e imperdíveis do Brasil.
               </p>
             </div>
           </div>
