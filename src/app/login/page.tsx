@@ -1,96 +1,75 @@
 'use client';
 
-import { useState, ChangeEvent, FormEvent } from 'react';
-import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Header } from '@/components/hearder';
 
-export default function Login() {
-  const [form, setForm] = useState({ email: '', password: '' });
-  const [loading, setLoading] = useState(false);
+export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const router = useRouter();
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleLogin = async () => {
     setMessage('');
-
     try {
-      const response = await fetch('http://localhost:8080/api/auth/login', {
+      const res = await fetch('http://localhost:8000/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ email, password }),
       });
 
-      if (response.ok) {
-        setMessage('Login realizado com sucesso!');
-        // redirecionar ou salvar token
+      if (res.ok) {
+        const user = await res.json();
+        localStorage.setItem('user_id', String(user.id)); // Armazena o user_id
+        router.push('/preferencias'); // Redireciona para a página de preferências (ou outra)
       } else {
-        const errorData = await response.json();
-        setMessage(`Erro: ${errorData.message || 'Falha no login.'}`);
+        const error = await res.json();
+        setMessage(error.detail || 'Erro ao fazer login');
       }
-    } catch (err) {
+    } catch (error) {
       setMessage('Erro ao conectar com o servidor.');
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-12 bg-white p-8 rounded shadow">
-      <h2 className="text-2xl font-semibold mb-6 text-center">Login</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Email</label>
-          <input
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <main className="flex-1 container mx-auto px-4 py-20 max-w-md">
+        <h1 className="text-4xl font-bold mb-6 text-center text-primary">Login</h1>
+
+        <div className="space-y-4">
+          <Input
             type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border rounded"
-            required
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
-        </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Senha</label>
-          <input
+          <Input
             type="password"
-            name="password"
-            value={form.password}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border rounded"
-            required
+            placeholder="Senha"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
+
+          <Button onClick={handleLogin} className="w-full">
+            Entrar
+          </Button>
+
+          {message && (
+            <p
+              className={`text-center text-sm font-medium ${
+                message.includes('Erro') ? 'text-red-600' : 'text-green-600'
+              }`}
+            >
+              {message}
+            </p>
+          )}
         </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-        >
-          {loading ? 'Entrando...' : 'Entrar'}
-        </button>
-      </form>
-
-      {message && (
-        <p
-          className={`mt-4 text-center font-medium ${
-            message.includes('sucesso') ? 'text-green-600' : 'text-red-600'
-          }`}
-        >
-          {message}
-        </p>
-      )}
-
-      <p className="mt-4 text-center text-sm">
-        Não tem uma conta?{' '}
-        <Link href="/cadastro" className="text-blue-600 hover:underline">
-          Cadastrar-se
-        </Link>
-      </p>
+      </main>
     </div>
   );
 }

@@ -1,15 +1,38 @@
 'use client';
 
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
 
-const preferencesOptions = ['Bares', 'Restaurantes', 'Shows', 'Pontos turísticos'];
+interface Preference {
+  id: number;
+  name: string;
+}
 
 export default function Cadastro() {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [preferences, setPreferences] = useState<string[]>([]);
+  const [preferencesOptions, setPreferencesOptions] = useState<Preference[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    // Busca as preferências no back-end
+    const fetchPreferences = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/preferences/get-preferences');
+        if (res.ok) {
+          const data = await res.json();
+          setPreferencesOptions(data);
+        } else {
+          console.error('Erro ao carregar preferências');
+        }
+      } catch (error) {
+        console.error('Erro ao conectar com a API:', error);
+      }
+    };
+
+    fetchPreferences();
+  }, []);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -30,7 +53,7 @@ export default function Cadastro() {
     const payload = { ...form, preferences };
 
     try {
-      const response = await fetch('http://localhost:8080/api/usuarios', {
+      const response = await fetch('http://localhost:8000/users/cadastro', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -93,18 +116,22 @@ export default function Cadastro() {
 
         <fieldset className="border rounded p-4">
           <legend className="text-sm font-semibold mb-2">Preferências</legend>
-          {preferencesOptions.map(option => (
-            <label key={option} className="block text-sm mb-1">
-              <input
-                type="checkbox"
-                value={option}
-                checked={preferences.includes(option)}
-                onChange={handleCheckboxChange}
-                className="mr-2"
-              />
-              {option}
-            </label>
-          ))}
+          {preferencesOptions.length === 0 ? (
+            <p className="text-sm text-gray-500">Carregando preferências...</p>
+          ) : (
+            preferencesOptions.map(option => (
+              <label key={option.id} className="block text-sm mb-1">
+                <input
+                  type="checkbox"
+                  value={option.name}
+                  checked={preferences.includes(option.name)}
+                  onChange={handleCheckboxChange}
+                  className="mr-2"
+                />
+                {option.name}
+              </label>
+            ))
+          )}
         </fieldset>
 
         <button
