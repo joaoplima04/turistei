@@ -39,10 +39,10 @@ export default function Home() {
                 </Button>
               </Link>
 
-              <Link href="/roteiros">
+              <Link href="/cadastra_roteiros">
                 <Button variant="ghost" size="lg" className="gap-2">
                   <NotebookPen className="w-5 h-5" />
-                  Meus Roteiros
+                  Criar roteiros
                 </Button>
               </Link>
             </div>
