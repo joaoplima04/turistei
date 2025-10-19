@@ -55,6 +55,13 @@ export default function Home() {
                 </Button>
               </Link>
 
+            <Link href="/perfil/roteiros">
+            <Button variant="outline" size="lg" className="gap-2">
+              <NotebookPen className="w-5 h-5" />
+              Meus Roteiros
+            </Button>
+            </Link>
+
               <Link href="/cadastro">
                 <Button variant="outline" size="lg" className="gap-2">
                   <UserPlus className="w-5 h-5" />
@@ -72,6 +79,7 @@ export default function Home() {
                 Escolha os tipos de atrações que mais gosta e personalize sua experiência de viagem.
               </p>
             </div>
+
 
             <div className="bg-card p-6 rounded-lg border">
               <Wand2 className="w-12 h-12 text-primary mb-4" />
