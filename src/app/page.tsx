@@ -62,6 +62,13 @@ export default function Home() {
             </Button>
             </Link>
 
+            <Link href="/mapa">
+            <Button variant="outline" size="lg" className="gap-2">
+              <NotebookPen className="w-5 h-5" />
+              Mapa
+            </Button>
+            </Link>
+
               <Link href="/cadastro">
                 <Button variant="outline" size="lg" className="gap-2">
                   <UserPlus className="w-5 h-5" />
