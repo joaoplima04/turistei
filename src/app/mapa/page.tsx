@@ -39,6 +39,9 @@ export default function MapaPage() {
   const [selectedPrefs, setSelectedPrefs] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  const defaultCenter = { lat: -15.7975, lng: -47.8919 }; // Brasília
 
   // 🔹 Carregar lugares e preferências
   useEffect(() => {
@@ -70,6 +73,24 @@ export default function MapaPage() {
     fetchData();
   }, []);
 
+  // 🔹 Obter localização atual do usuário
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setMessage('Geolocalização não suportada pelo navegador.');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setUserLocation({ lat: latitude, lng: longitude });
+      },
+      () => {
+        setMessage('Permissão de localização negada. Exibindo mapa padrão.');
+      }
+    );
+  }, []);
+
   // 🔹 Filtrar locais por preferências
   const applyFilters = () => {
     if (selectedPrefs.length === 0) {
@@ -91,8 +112,6 @@ export default function MapaPage() {
         : [...prev, name]
     );
   };
-
-  const center = { lat: -15.7975, lng: -47.8919 }; // Brasília
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -136,8 +155,8 @@ export default function MapaPage() {
         {/* 🗺️ Mapa */}
         <div className="w-full h-[600px] rounded-lg overflow-hidden border shadow">
           <MapContainer
-            center={center}
-            zoom={12}
+            center={userLocation || defaultCenter}
+            zoom={13}
             scrollWheelZoom={true}
             style={{ height: '100%', width: '100%' }}
           >
@@ -146,6 +165,14 @@ export default function MapaPage() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
+            {/* 📍 Marcador da localização do usuário */}
+            {userLocation && (
+              <Marker position={[userLocation.lat, userLocation.lng]}>
+                <Popup>📍 Você está aqui!</Popup>
+              </Marker>
+            )}
+
+            {/* 📍 Marcadores dos locais turísticos */}
             {filteredPlaces.map((place) => (
               <Marker
                 key={place.id}
