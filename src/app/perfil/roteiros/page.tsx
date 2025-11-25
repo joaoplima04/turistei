@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Header } from '@/components/hearder';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,7 @@ interface Schedule {
 }
 
 export default function RoteirosPage() {
+  const router = useRouter();
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
   const [loading, setLoading] = useState(true);
@@ -67,21 +69,22 @@ export default function RoteirosPage() {
   };
 
   const formatDate = (d: Date) => d.toISOString().split('T')[0];
-
   const daysInMonth = getDaysInMonth(month);
   const firstDayOfMonth = new Date(month.getFullYear(), month.getMonth(), 1).getDay();
 
-  const handlePrevMonth = () => {
-    setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1));
-  };
-
-  const handleNextMonth = () => {
-    setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1));
-  };
+  const handlePrevMonth = () => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1));
+  const handleNextMonth = () => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1));
 
   const getScheduleForDay = (day: number) => {
     const dateStr = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     return schedules.find((s) => s.date === dateStr);
+  };
+
+  const handleViewOnMap = () => {
+    if (selectedSchedule) {
+      localStorage.setItem('selectedSchedule', JSON.stringify(selectedSchedule));
+      router.push('/mapa-roteiro');
+    }
   };
 
   return (
@@ -100,18 +103,15 @@ export default function RoteirosPage() {
           <div className="flex flex-col items-center">
             <div className="flex justify-between items-center w-full max-w-lg mb-4">
               <Button variant="outline" onClick={handlePrevMonth}>◀</Button>
-              <h2 className="text-xl font-semibold">
+              <h2 className="text-xl font-semibold capitalize">
                 {month.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}
               </h2>
               <Button variant="outline" onClick={handleNextMonth}>▶</Button>
             </div>
 
-            {/* Grade do calendário */}
             <div className="grid grid-cols-7 gap-3 w-full max-w-3xl">
               {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day) => (
-                <div key={day} className="text-center font-medium text-muted-foreground">
-                  {day}
-                </div>
+                <div key={day} className="text-center font-medium text-muted-foreground">{day}</div>
               ))}
 
               {Array.from({ length: firstDayOfMonth }).map((_, idx) => (
@@ -132,9 +132,7 @@ export default function RoteirosPage() {
                     <CardContent className="text-center p-2">
                       <p className="font-bold">{day}</p>
                       {schedule && (
-                        <p className="text-xs text-primary mt-1 truncate w-20">
-                          {schedule.title}
-                        </p>
+                        <p className="text-xs text-primary mt-1 truncate w-20">{schedule.title}</p>
                       )}
                     </CardContent>
                   </Card>
@@ -144,10 +142,10 @@ export default function RoteirosPage() {
           </div>
         )}
 
-        {/* Modal de detalhes do roteiro */}
+        {/* Modal de detalhes */}
         {selectedSchedule && (
           <Dialog open={!!selectedSchedule} onOpenChange={() => setSelectedSchedule(null)}>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{selectedSchedule.title}</DialogTitle>
                 <p className="text-sm text-muted-foreground">
@@ -157,25 +155,29 @@ export default function RoteirosPage() {
 
               <div className="mt-4 space-y-4">
                 {selectedSchedule.items.map((item) => (
-                  <div key={item.id} className="border rounded-lg p-3">
-                    <h3 className="font-semibold">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      {item.start_time} - {item.end_time}
-                    </p>
-                    {item.place && (
-                      <div className="flex items-center gap-3">
-                        {item.place.image_url && (
-                          <img
-                            src={item.place.image_url}
-                            alt={item.place.name}
-                            className="w-16 h-16 rounded object-cover"
-                          />
-                        )}
-                        <p className="text-sm">{item.place.name}</p>
+                  <Card key={item.id} className="shadow-sm border">
+                    <CardContent className="p-3 flex gap-3">
+                      {item.place?.image_url && (
+                        <img
+                          src={item.place.image_url}
+                          alt={item.place.name}
+                          className="w-20 h-20 rounded-lg object-cover"
+                        />
+                      )}
+                      <div>
+                        <h3 className="font-semibold">{item.title}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {item.start_time} - {item.end_time}
+                        </p>
+                        {item.place && <p className="text-sm text-primary">{item.place.name}</p>}
                       </div>
-                    )}
-                  </div>
+                    </CardContent>
+                  </Card>
                 ))}
+              </div>
+
+              <div className="flex justify-center mt-6">
+                <Button onClick={handleViewOnMap}>🗺️ Visualizar no Mapa</Button>
               </div>
             </DialogContent>
           </Dialog>

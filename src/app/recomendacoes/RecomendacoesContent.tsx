@@ -32,11 +32,70 @@ export default function RecomendacoesContent() {
   const [preferencesOptions, setPreferencesOptions] = useState<Preference[]>([]);
   const [selectedPreferences, setSelectedPreferences] = useState<string[]>([]);
 
+  // Localização do usuário
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  // -------------------------------
+  // 1) Obter geolocalização
+  // -------------------------------
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setUserLocation({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          });
+        },
+        (err) => console.warn("Erro ao obter localização:", err)
+      );
+    }
+  }, []);
+
+  // -------------------------------
+  // 2) Haversine - calcular distância
+  // -------------------------------
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371; // km
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(lat1 * (Math.PI / 180)) *
+        Math.cos(lat2 * (Math.PI / 180)) *
+        Math.sin(dLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c;
+  };
+
+  // -------------------------------
+  // 3) Ordenar por distância
+  // -------------------------------
+  const ordenarPorDistancia = () => {
+    if (!userLocation) {
+      setMessage("Não foi possível acessar sua localização.");
+      return;
+    }
+
+    const sorted = [...recommendations].sort((a, b) => {
+      const distA = calculateDistance(userLocation.lat, userLocation.lng, a.latitude, a.longitude);
+      const distB = calculateDistance(userLocation.lat, userLocation.lng, b.latitude, b.longitude);
+      return distA - distB;
+    });
+
+    setRecommendations(sorted);
+  };
+
+  // Buscar user_id
   useEffect(() => {
     const id = localStorage.getItem('user_id');
     if (id) setUserId(Number(id));
   }, []);
 
+  // Buscar preferências
   useEffect(() => {
     if (!userId) return;
 
@@ -62,6 +121,7 @@ export default function RecomendacoesContent() {
     fetchPreferences();
   }, [userId]);
 
+  // Buscar recomendações
   useEffect(() => {
     if (!userId) return;
     fetchRecommendations();
@@ -115,22 +175,27 @@ export default function RecomendacoesContent() {
     }
   };
 
-const handleSelectPlace = (placeId: number) => {
-  if (!scheduleItemId) return;
+  const handleSelectPlace = (placeId: number) => {
+    if (!scheduleItemId) return;
 
-  const storedDraft = localStorage.getItem("draftSchedule");
-  if (storedDraft) {
-    const draft = JSON.parse(storedDraft);
+    const storedDraft = localStorage.getItem("draftSchedule");
+    if (storedDraft) {
+      const draft = JSON.parse(storedDraft);
 
-    draft.items = draft.items.map((item: any) =>
-      item.id === Number(scheduleItemId) ? { ...item, placeId } : item
-    );
+      draft.items = draft.items.map((item: any) =>
+        item.id === Number(scheduleItemId) ? { ...item, placeId } : item
+      );
 
-    localStorage.setItem("draftSchedule", JSON.stringify(draft));
-  }
+      localStorage.setItem("draftSchedule", JSON.stringify(draft));
+    }
 
-  router.push("/cadastra_roteiros");
-};
+    router.push("/cadastra_roteiros");
+  };
+
+  const handleViewOnMap = (attraction: Attraction) => {
+    localStorage.setItem('recommendedPlace', JSON.stringify(attraction));
+    router.push('/mapa-recomendacoes');
+  };
 
   if (!userId) {
     return (
@@ -147,10 +212,18 @@ const handleSelectPlace = (placeId: number) => {
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-1 container mx-auto px-4 py-20 max-w-4xl">
-        <h1 className="text-4xl font-bold mb-8 text-center text-primary">
+        <h1 className="text-4xl font-bold mb-6 text-center text-primary">
           Recomendações
         </h1>
 
+        {/* Botão de ordenar por distância */}
+        <div className="flex justify-center mb-10">
+          <Button onClick={ordenarPorDistancia} className="bg-blue-600 hover:bg-blue-700">
+            📏 Ordenar por Distância
+          </Button>
+        </div>
+
+        {/* Seção de Preferências */}
         <div className="mb-8 border rounded-lg p-4">
           <h2 className="font-semibold mb-4">Alterar Preferências</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
@@ -188,6 +261,7 @@ const handleSelectPlace = (placeId: number) => {
           <p className="text-center text-red-600 mb-6">{message}</p>
         )}
 
+        {/* Lista de Recomendações */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {recommendations.map((attraction) => (
             <div
@@ -198,27 +272,53 @@ const handleSelectPlace = (placeId: number) => {
                 <img
                   src={attraction.image_url}
                   alt={attraction.name}
-                  className="w-full h-40 object-cover rounded mb-4"
+                  className="w-full h-52 object-cover rounded mb-4"
                 />
               )}
-              <h2 className="text-xl font-semibold mb-2">
+
+              <h2 className="text-2xl font-bold leading-snug mb-3">
                 {attraction.name}
               </h2>
-              <p className="text-muted-foreground mb-2">
+
+              <p className="text-gray-700 text-base mb-3">
                 {attraction.description}
               </p>
-              <p className="text-sm text-primary font-medium mb-4">
+
+              <p className="text-sm text-primary font-medium mt-4 mb-2">
                 Localização: {attraction.latitude}, {attraction.longitude}
               </p>
 
-              {scheduleItemId && (
-                <Button
-                  className="w-full"
-                  onClick={() => handleSelectPlace(attraction.id)}
-                >
-                  Selecionar este Local
-                </Button>
+              {/* Distância */}
+              {userLocation && (
+                <p className="text-sm text-muted-foreground mb-4">
+                  Distância:{" "}
+                  {calculateDistance(
+                    userLocation.lat,
+                    userLocation.lng,
+                    attraction.latitude,
+                    attraction.longitude
+                  ).toFixed(2)}{" "}
+                  km
+                </p>
               )}
+
+              <div className="flex gap-3 mt-4">
+                <Button
+                  className="flex-1 bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                  onClick={() => handleViewOnMap(attraction)}
+                >
+                  🗺️ Visualizar no Mapa
+                </Button>
+
+                {scheduleItemId && (
+                  <Button
+                    className="flex-1"
+                    onClick={() => handleSelectPlace(attraction.id)}
+                  >
+                    Selecionar este Local
+                  </Button>
+                )}
+              </div>
             </div>
           ))}
         </div>

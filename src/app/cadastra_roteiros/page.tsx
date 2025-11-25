@@ -176,7 +176,7 @@ export default function RoteiroContent() {
         localStorage.removeItem("selectedPlaces");
 
         alert("Roteiro salvo com sucesso!");
-        router.push("/meus_roteiros"); // redirecionar para listagem
+        router.push("perfil/roteiros"); // redirecionar para listagem
       } else {
         const err = await res.json();
         alert(`Erro ao salvar roteiro: ${err.detail || "Falha desconhecida"}`);

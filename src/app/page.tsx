@@ -75,6 +75,14 @@ export default function Home() {
                   Criar Conta
                 </Button>
               </Link>
+
+              <Link href="/solicitar-atracao">
+              <Button variant="outline" size="lg" className="gap-2">
+                <Wand2 className="w-5 h-5" />
+                Sugerir Atração
+              </Button>
+            </Link>
+            
             </div>
           </div>
 
