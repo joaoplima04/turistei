@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Turistei
 
-## Getting Started
+**Turistei** is a full-stack travel-planning application focused on helping users discover attractions, define travel preferences, receive recommendations, organize itineraries, and explore places through interactive maps.
 
-First, run the development server:
+This repository contains the **Next.js frontend**. The companion Python/FastAPI backend is available at [`joaoplima04/TuristeiAPI`](https://github.com/joaoplima04/TuristeiAPI).
+
+## Tech stack
+
+- **Next.js 14**
+- **React 18**
+- **TypeScript**
+- **Tailwind CSS**
+- **Leaflet / React Leaflet** for map experiences
+- **Radix UI** primitives
+- **Lucide React** icons
+
+## Product flows
+
+The application includes user-facing and administrative workflows such as:
+
+- User registration and login
+- User profile management
+- Travel preference capture
+- Attraction recommendations
+- Interactive maps
+- Itinerary creation and route visualization
+- Attraction submission requests
+- Administrative screens for platform management
+
+The frontend is organized with the Next.js App Router under `src/app`, with reusable UI elements kept under `src/components`.
+
+## Project structure
+
+```text
+src/
+├── app/
+│   ├── admin/                  # Administrative flows
+│   ├── cadastro/               # Registration
+│   ├── login/                  # Login
+│   ├── perfil/                 # User profile
+│   ├── preferencias/           # Travel preferences
+│   ├── recomendacoes/          # Recommendations
+│   ├── mapa/                   # Map experience
+│   ├── mapa-recomendacoes/     # Recommendation map
+│   ├── mapa-roteiro/           # Itinerary map
+│   ├── cadastra_roteiros/      # Itinerary creation
+│   └── solicitar-atracao/      # New-attraction request flow
+├── components/                 # Reusable UI components
+└── lib/                        # Shared utilities
+```
+
+## Running locally
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/joaoplima04/turistei.git
+cd turistei
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Start the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000` in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Backend integration
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Turistei is designed to work with the FastAPI service in the companion [`TuristeiAPI`](https://github.com/joaoplima04/TuristeiAPI) repository. The backend owns the relational data model and API domains for users, places, preferences, recommendations, schedules, and attraction requests.
 
-## Learn More
+Keeping the frontend and backend separated makes the API boundary explicit and allows each side to evolve independently.
 
-To learn more about Next.js, take a look at the following resources:
+## Engineering focus
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This project demonstrates practical full-stack product development across:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Typed React/Next.js interfaces
+- API-driven application flows
+- Client/server separation
+- Interactive map integration
+- Reusable component architecture
+- User and administrative workflows
 
-## Deploy on Vercel
+## Author
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**João Lucas**  
+Full-stack software engineer focused on TypeScript/Next.js, Python/FastAPI, PostgreSQL, API integrations, cloud infrastructure, and secure software development.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- GitHub: [@joaoplima04](https://github.com/joaoplima04)
